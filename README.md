@@ -58,7 +58,7 @@ async function finalTest() {
   // 创建会话实例
   const session = new Session(client);
 
-  // 订阅会话更新
+  // 订阅会话更新,这里是整体过程数据
   // 返回取消订阅函数，可用于停止订阅
   session.subscribe((session, message) => {
     console.log(
@@ -73,7 +73,7 @@ async function finalTest() {
     );
   });
 
-  // 发送消息请求分析项目
+  // 发送消息请求分析项目，result是最终结果数据
   const result = await session.send(`
     分析当前项目，然后返回 json
     json 结构是：
