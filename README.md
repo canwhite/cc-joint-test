@@ -38,6 +38,8 @@
 
 ## 💻 使用示例
 
+### 基础集成示例
+
 ```typescript
 import {
   Session,
@@ -95,6 +97,28 @@ async function finalTest() {
 // 执行测试函数
 finalTest();
 ```
+
+### 🎨 完整应用示例
+
+我们还提供了一个完整的聊天应用示例，展示了如何构建基于 Claude Code 的 Web 应用：
+
+- **项目位置**: [`chat-example/`](./chat-example/)
+- **功能特性**:
+  - 基于 React 的现代化聊天界面
+  - Markdown 格式渲染 AI 回复
+  - 支持复制 Markdown 和纯文本
+  - 实时消息交互
+  - 响应式设计
+
+**查看详细文档**: [chat-example README](./chat-example/README.md)
+
+**快速体验**:
+```bash
+cd chat-example
+bun install
+bun run server.ts
+```
+然后访问 http://localhost:3001
 
 ## 📦 安装说明
 

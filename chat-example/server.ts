@@ -42,8 +42,6 @@ class AIChatService {
 // 创建AI聊天服务实例
 const aiChatService = new AIChatService();
 
-// TODO：这里可以加一些其他服务
-
 // 启动服务器
 Bun.serve({
   //一个端口
@@ -104,15 +102,22 @@ Bun.serve({
     }
 
     // 处理静态文件 (.js, .css, 图片等)
-    if (url.pathname.startsWith("/dist/") || url.pathname.endsWith(".js") || url.pathname.endsWith(".css")) {
+    if (
+      url.pathname.startsWith("/dist/") ||
+      url.pathname.endsWith(".js") ||
+      url.pathname.endsWith(".css")
+    ) {
       const filePath = "." + url.pathname;
       const file = Bun.file(filePath);
       if (await file.exists()) {
         return new Response(file, {
           headers: {
-            "Content-Type": url.pathname.endsWith(".js") ? "application/javascript" :
-                         url.pathname.endsWith(".css") ? "text/css" : "text/plain"
-          }
+            "Content-Type": url.pathname.endsWith(".js")
+              ? "application/javascript"
+              : url.pathname.endsWith(".css")
+              ? "text/css"
+              : "text/plain",
+          },
         });
       }
     }

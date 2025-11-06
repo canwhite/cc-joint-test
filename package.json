@@ -12,7 +12,7 @@
   "scripts": {
     "test": "bun run index.ts",
     "chat:dev": "cd chat-example && bun --hot server.ts",
-    "chat:start": "cd chat-example && bun server.ts",
+    "chat:start": "cd chat-example &&  bun build frontend.tsx --outdir dist --target browser && bun server.ts",
     "chat:build": "cd chat-example && bun build frontend.tsx --outdir dist --target browser"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0"
   }
 }
