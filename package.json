@@ -10,8 +10,6 @@
     "typescript": "^5"
   },
   "scripts": {
-    "dev": "bun --hot server.ts",
-    "start": "bun server.ts",
     "test": "bun run index.ts",
     "chat:dev": "cd chat-example && bun --hot server.ts",
     "chat:start": "cd chat-example && bun server.ts",
