@@ -13,7 +13,10 @@
     "test": "bun run index.ts",
     "chat:dev": "cd chat-example && bun --hot server.ts",
     "chat:start": "cd chat-example &&  bun build frontend.tsx --outdir dist --target browser && bun server.ts",
-    "chat:build": "cd chat-example && bun build frontend.tsx --outdir dist --target browser"
+    "chat:build": "cd chat-example && bun build frontend.tsx --outdir dist --target browser",
+    "chat:comm:dev": "cd chat-example-comm && bun --hot server.ts",
+    "chat:comm:start": "cd chat-example-comm &&  bun build frontend.tsx --outdir dist --target browser && bun server.ts",
+    "chat:comm:build": "cd chat-example-comm && bun build frontend.tsx --outdir dist --target browser"
   },
   "dependencies": {
     "@iamqc/cc-communication": "^1.0.0",
@@ -21,6 +24,7 @@
     "@iamqc/cc-session": "^1.1.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "ahooks": "^3.9.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0"

@@ -142,25 +142,46 @@ console.log('WebSocket 服务器已启动');
 
 ### 🎨 完整应用示例
 
-我们还提供了一个完整的聊天应用示例，展示了如何构建基于 Claude Code 的 Web 应用：
+我们提供了两个完整的聊天应用示例，展示了不同的架构方案：
 
+#### 1. HTTP 版本 (chat-example)
 - **项目位置**: [`chat-example/`](./chat-example/)
+- **通信方式**: HTTP REST API
+- **特点**: 简单直接，适合基础应用
 - **功能特性**:
   - 基于 React 的现代化聊天界面
   - Markdown 格式渲染 AI 回复
   - 支持复制 Markdown 和纯文本
-  - 实时消息交互
   - 响应式设计
 
 **查看详细文档**: [chat-example README](./chat-example/README.md)
 
 **快速体验**:
 ```bash
-cd chat-example
-bun install
-bun run server.ts
+bun run chat:build
+bun run chat:start
 ```
 然后访问 http://localhost:3001
+
+#### 2. WebSocket 版本 (chat-example-comm)
+- **项目位置**: [`chat-example-comm/`](./chat-example-comm/)
+- **通信方式**: WebSocket 实时通信
+- **特点**: 实时性强，适合需要实时更新的应用
+- **功能特性**:
+  - 基于 `cc-communication` 的实时双向通信
+  - 多用户独立会话管理
+  - 自动重连机制
+  - 实时连接状态显示
+  - 消息发送状态跟踪
+
+**查看详细文档**: [chat-example-comm README](./chat-example-comm/README.md)
+
+**快速体验**:
+```bash
+bun run chat:comm:build
+bun run chat:comm:start
+```
+然后访问 http://localhost:3002
 
 ## 📦 安装说明
 
