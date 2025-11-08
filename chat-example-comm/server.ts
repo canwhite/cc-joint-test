@@ -42,13 +42,16 @@ class ChatSessionManager {
 
           // 发送处理中状态，包含AI回复内容
           try {
-            ws.sendToClient(clientId, {
-              type: 'ai_processing',
-              data: {
-                response: responseText,
-                timestamp: new Date().toISOString()
-              }
-            });
+            if(responseText && responseText.length > 0 ){
+              ws.sendToClient(clientId, {
+                type: 'ai_processing',
+                data: {
+                  response: responseText,
+                  timestamp: new Date().toISOString()
+                }
+              });
+            }
+
             console.log(`🔄 发送AI处理中状态给客户端 ${clientId}`);
           } catch (error) {
             console.error(`❌ 发送处理中状态失败:`, error);
