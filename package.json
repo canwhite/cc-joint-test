@@ -4,13 +4,16 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "prettier": "^3.6.2"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "scripts": {
     "test": "bun run index.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "chat:dev": "cd chat-example && bun --hot server.ts",
     "chat:start": "cd chat-example &&  bun build frontend.tsx --outdir dist --target browser && bun server.ts",
     "chat:build": "cd chat-example && bun build frontend.tsx --outdir dist --target browser",

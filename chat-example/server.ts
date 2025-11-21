@@ -1,4 +1,4 @@
-import { Session, createClientWithPreset } from "@iamqc/cc-session";
+import { Session, createClientWithPreset } from '@iamqc/cc-session';
 
 // 创建AI聊天服务
 class AIChatService {
@@ -6,8 +6,8 @@ class AIChatService {
 
   async initialize() {
     try {
-      const client = createClientWithPreset("development", {
-        pathToClaudeCodeExecutable: "/Users/zack/.bun/bin/claude",
+      const client = createClientWithPreset('development', {
+        pathToClaudeCodeExecutable: '/Users/zack/.bun/bin/claude',
       });
 
       this.session = new Session(client);
@@ -17,24 +17,24 @@ class AIChatService {
         console.log(`[AI Session] ${message.type}:`, message);
       });
 
-      console.log("AI Chat Service initialized successfully");
+      console.log('AI Chat Service initialized successfully');
     } catch (error) {
-      console.error("Failed to initialize AI Chat Service:", error);
+      console.error('Failed to initialize AI Chat Service:', error);
     }
   }
 
   async sendMessage(message: string): Promise<string> {
     if (!this.session) {
-      throw new Error("AI Chat Service not initialized");
+      throw new Error('AI Chat Service not initialized');
     }
 
     try {
-      const result = await this.session.send(message);
+      const result = await this.session.send(message, undefined);
       const responseText = result.lastAssistantMessage.content[0].content.text;
       return responseText;
     } catch (error) {
-      console.error("Error sending message to AI:", error);
-      throw new Error("Failed to get AI response");
+      console.error('Error sending message to AI:', error);
+      throw new Error('Failed to get AI response');
     }
   }
 }
@@ -51,19 +51,20 @@ Bun.serve({
     const url = new URL(req.url);
 
     // 处理根路径 - 返回HTML页面
-    if (url.pathname === "/") {
-      return new Response(Bun.file("./index.html"));
+    if (url.pathname === '/') {
+      return new Response(Bun.file('./index.html'));
     }
 
     // 处理API请求
-    if (url.pathname === "/api/chat" && req.method === "POST") {
+    if (url.pathname === '/api/chat' && req.method === 'POST') {
       try {
-        const { message } = await req.json();
+        const data: { message?: string } = await req.json();
+        const { message } = data;
 
-        if (!message || typeof message !== "string") {
-          return new Response(JSON.stringify({ error: "Invalid message" }), {
+        if (!message || typeof message !== 'string') {
+          return new Response(JSON.stringify({ error: 'Invalid message' }), {
             status: 400,
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Content-Type': 'application/json' },
           });
         }
 
@@ -75,26 +76,26 @@ Bun.serve({
             response,
           }),
           {
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Content-Type': 'application/json' },
           }
         );
       } catch (error) {
-        console.error("Error processing chat request:", error);
+        console.error('Error processing chat request:', error);
         return new Response(
           JSON.stringify({
-            error: "Failed to process request",
+            error: 'Failed to process request',
           }),
           {
             status: 500,
-            headers: { "Content-Type": "application/json" },
+            headers: { 'Content-Type': 'application/json' },
           }
         );
       }
     }
 
     // 处理静态文件
-    if (url.pathname.startsWith("/static/")) {
-      const filePath = "." + url.pathname;
+    if (url.pathname.startsWith('/static/')) {
+      const filePath = '.' + url.pathname;
       const file = Bun.file(filePath);
       if (await file.exists()) {
         return new Response(file);
@@ -103,26 +104,26 @@ Bun.serve({
 
     // 处理静态文件 (.js, .css, 图片等)
     if (
-      url.pathname.startsWith("/dist/") ||
-      url.pathname.endsWith(".js") ||
-      url.pathname.endsWith(".css")
+      url.pathname.startsWith('/dist/') ||
+      url.pathname.endsWith('.js') ||
+      url.pathname.endsWith('.css')
     ) {
-      const filePath = "." + url.pathname;
+      const filePath = '.' + url.pathname;
       const file = Bun.file(filePath);
       if (await file.exists()) {
         return new Response(file, {
           headers: {
-            "Content-Type": url.pathname.endsWith(".js")
-              ? "application/javascript"
-              : url.pathname.endsWith(".css")
-              ? "text/css"
-              : "text/plain",
+            'Content-Type': url.pathname.endsWith('.js')
+              ? 'application/javascript'
+              : url.pathname.endsWith('.css')
+                ? 'text/css'
+                : 'text/plain',
           },
         });
       }
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response('Not Found', { status: 404 });
   },
 
   // 开发模式配置
@@ -134,5 +135,5 @@ Bun.serve({
 
 // 初始化AI服务
 aiChatService.initialize().then(() => {
-  console.log("Server running on http://localhost:3001");
+  console.log('Server running on http://localhost:3001');
 });

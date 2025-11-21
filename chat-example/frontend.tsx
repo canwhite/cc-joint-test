@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createRoot } from "react-dom/client";
-import ReactMarkdown from "react-markdown";
+import React, { useState, useRef, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import ReactMarkdown from 'react-markdown';
 
 // 添加 React 导入检查
 if (typeof React === 'undefined') {
@@ -16,13 +16,13 @@ interface Message {
 
 const AIChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 自动滚动到最新消息
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const sendMessage = async () => {
@@ -32,42 +32,43 @@ const AIChat: React.FC = () => {
       id: Date.now().toString(),
       content: inputValue.trim(),
       isUser: true,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    setInputValue('');
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
+      const response = await fetch('/api/chat', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ message: userMessage.content }),
       });
 
-      const data = await response.json();
+      const data: { success?: boolean; response?: string; error?: string } =
+        await response.json();
 
       if (data.success) {
         const aiMessage: Message = {
           id: (Date.now() + 1).toString(),
-          content: data.response,
+          content: data.response || '',
           isUser: false,
-          timestamp: new Date()
+          timestamp: new Date(),
         };
         setMessages(prev => [...prev, aiMessage]);
       } else {
-        throw new Error(data.error || "Unknown error");
+        throw new Error(data.error || 'Unknown error');
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "抱歉，发送消息时出现错误，请稍后重试。",
+        content: '抱歉，发送消息时出现错误，请稍后重试。',
         isUser: false,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -76,16 +77,16 @@ const AIChat: React.FC = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("zh-CN", {
-      hour: "2-digit",
-      minute: "2-digit"
+    return date.toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -112,7 +113,9 @@ const AIChat: React.FC = () => {
 
       // 显示复制成功提示
       const notification = document.createElement('div');
-      notification.textContent = `已复制${format === 'markdown' ? 'markdown格式' : '纯文本'}内容`;
+      notification.textContent = `已复制${
+        format === 'markdown' ? 'markdown格式' : '纯文本'
+      }内容`;
       notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -136,9 +139,8 @@ const AIChat: React.FC = () => {
           }
         }, 300);
       }, 2000);
-
     } catch (error) {
-      console.error("复制失败:", error);
+      console.error('复制失败:', error);
 
       // 显示复制失败提示
       const notification = document.createElement('div');
@@ -170,152 +172,193 @@ const AIChat: React.FC = () => {
   };
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100vh",
-      maxWidth: "800px",
-      margin: "0 auto",
-      backgroundColor: "#f5f5f5",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        maxWidth: '800px',
+        margin: '0 auto',
+        backgroundColor: '#f5f5f5',
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      }}
+    >
       {/* 标题栏 */}
-      <div style={{
-        padding: "16px",
-        backgroundColor: "#fff",
-        borderBottom: "1px solid #e0e0e0",
-        textAlign: "center",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-      }}>
-        <h1 style={{
-          margin: 0,
-          color: "#333",
-          fontSize: "24px",
-          fontWeight: "600"
-        }}>
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #e0e0e0',
+          textAlign: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            color: '#333',
+            fontSize: '24px',
+            fontWeight: '600',
+          }}
+        >
           AI 聊天助手
         </h1>
-        <p style={{
-          margin: "4px 0 0 0",
-          color: "#666",
-          fontSize: "14px"
-        }}>
+        <p
+          style={{
+            margin: '4px 0 0 0',
+            color: '#666',
+            fontSize: '14px',
+          }}
+        >
           基于 Claude Code 的智能对话系统
         </p>
       </div>
 
       {/* 消息区域 */}
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        padding: "16px",
-        backgroundColor: "#fff"
-      }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '16px',
+          backgroundColor: '#fff',
+        }}
+      >
         {messages.length === 0 ? (
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-            color: "#999",
-            textAlign: "center"
-          }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🤖</div>
-            <h3 style={{ margin: "0 0 8px 0", color: "#666" }}>欢迎使用 AI 聊天助手</h3>
-            <p style={{ margin: 0, fontSize: "14px" }}>开始对话，体验智能 AI 助手的强大能力</p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: '#999',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#666' }}>
+              欢迎使用 AI 聊天助手
+            </h3>
+            <p style={{ margin: 0, fontSize: '14px' }}>
+              开始对话，体验智能 AI 助手的强大能力
+            </p>
           </div>
         ) : (
-          messages.map((message) => (
+          messages.map(message => (
             <div
               key={message.id}
               style={{
-                display: "flex",
-                justifyContent: message.isUser ? "flex-end" : "flex-start",
-                marginBottom: "16px"
+                display: 'flex',
+                justifyContent: message.isUser ? 'flex-end' : 'flex-start',
+                marginBottom: '16px',
               }}
             >
-              <div style={{
-                maxWidth: "70%",
-                padding: "12px 16px",
-                borderRadius: "18px",
-                backgroundColor: message.isUser ? "#007AFF" : "#F0F0F0",
-                color: message.isUser ? "#FFF" : "#333",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                wordWrap: "break-word",
-                position: "relative"
-              }}>
+              <div
+                style={{
+                  maxWidth: '70%',
+                  padding: '12px 16px',
+                  borderRadius: '18px',
+                  backgroundColor: message.isUser ? '#007AFF' : '#F0F0F0',
+                  color: message.isUser ? '#FFF' : '#333',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                  wordWrap: 'break-word',
+                  position: 'relative',
+                }}
+              >
                 {message.isUser ? (
-                  <div style={{ whiteSpace: "pre-wrap" }}>{message.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {message.content}
+                  </div>
                 ) : (
                   <div className="markdown-content">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                 )}
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: message.isUser ? "flex-end" : "space-between",
-                  marginTop: "4px",
-                  gap: "8px"
-                }}>
-                  <div style={{
-                    fontSize: "12px",
-                    opacity: 0.7
-                  }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: message.isUser
+                      ? 'flex-end'
+                      : 'space-between',
+                    marginTop: '4px',
+                    gap: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      opacity: 0.7,
+                    }}
+                  >
                     {formatTime(message.timestamp)}
                   </div>
                   {!message.isUser && (
-                    <div style={{
-                      display: "flex",
-                      gap: "4px",
-                      opacity: 0,
-                      transition: "opacity 0.2s ease"
-                    }} className="copy-buttons">
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '4px',
+                        opacity: 0,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                      className="copy-buttons"
+                    >
                       <button
-                        onClick={() => copyToClipboard(message.content, 'markdown')}
+                        onClick={() =>
+                          copyToClipboard(message.content, 'markdown')
+                        }
                         style={{
-                          background: "rgba(255, 255, 255, 0.9)",
-                          border: "none",
-                          borderRadius: "12px",
-                          padding: "4px 8px",
-                          fontSize: "10px",
-                          color: "#333",
-                          cursor: "pointer",
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                          transition: "all 0.2s ease"
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          padding: '4px 8px',
+                          fontSize: '10px',
+                          color: '#333',
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                          transition: 'all 0.2s ease',
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 1)";
-                          e.currentTarget.style.transform = "scale(1.05)";
+                        onMouseEnter={e => {
+                          const button = e.currentTarget as HTMLButtonElement;
+                          button.style.background = 'rgba(255, 255, 255, 1)';
+                          button.style.transform = 'scale(1.05)';
                         }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
-                          e.currentTarget.style.transform = "scale(1)";
+                        onMouseLeave={e => {
+                          const button = e.currentTarget as HTMLButtonElement;
+                          button.style.background = 'rgba(255, 255, 255, 0.9)';
+                          button.style.transform = 'scale(1)';
                         }}
                       >
                         📋 MD
                       </button>
                       <button
-                        onClick={() => copyToClipboard(message.content.replace(/[#*`\[\]]/g, ''), 'text')}
+                        onClick={() =>
+                          copyToClipboard(
+                            message.content.replace(/[#*`\[\]]/g, ''),
+                            'text'
+                          )
+                        }
                         style={{
-                          background: "rgba(255, 255, 255, 0.9)",
-                          border: "none",
-                          borderRadius: "12px",
-                          padding: "4px 8px",
-                          fontSize: "10px",
-                          color: "#333",
-                          cursor: "pointer",
-                          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                          transition: "all 0.2s ease"
+                          background: 'rgba(255, 255, 255, 0.9)',
+                          border: 'none',
+                          borderRadius: '12px',
+                          padding: '4px 8px',
+                          fontSize: '10px',
+                          color: '#333',
+                          cursor: 'pointer',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                          transition: 'all 0.2s ease',
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 1)";
-                          e.currentTarget.style.transform = "scale(1.05)";
+                        onMouseEnter={e => {
+                          const button = e.currentTarget as HTMLButtonElement;
+                          button.style.background = 'rgba(255, 255, 255, 1)';
+                          button.style.transform = 'scale(1.05)';
                         }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
-                          e.currentTarget.style.transform = "scale(1)";
+                        onMouseLeave={e => {
+                          const button = e.currentTarget as HTMLButtonElement;
+                          button.style.background = 'rgba(255, 255, 255, 0.9)';
+                          button.style.transform = 'scale(1)';
                         }}
                       >
                         📝 文本
@@ -328,43 +371,55 @@ const AIChat: React.FC = () => {
           ))
         )}
         {isLoading && (
-          <div style={{
-            display: "flex",
-            justifyContent: "flex-start",
-            marginBottom: "16px"
-          }}>
-            <div style={{
-              padding: "12px 16px",
-              borderRadius: "18px",
-              backgroundColor: "#F0F0F0",
-              color: "#666"
-            }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px"
-              }}>
-                <div style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#999",
-                  animation: "pulse 1.5s infinite"
-                }}></div>
-                <div style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#999",
-                  animation: "pulse 1.5s infinite 0.5s"
-                }}></div>
-                <div style={{
-                  width: "8px",
-                  height: "8px",
-                  borderRadius: "50%",
-                  backgroundColor: "#999",
-                  animation: "pulse 1.5s infinite 1s"
-                }}></div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              marginBottom: '16px',
+            }}
+          >
+            <div
+              style={{
+                padding: '12px 16px',
+                borderRadius: '18px',
+                backgroundColor: '#F0F0F0',
+                color: '#666',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#999',
+                    animation: 'pulse 1.5s infinite',
+                  }}
+                ></div>
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#999',
+                    animation: 'pulse 1.5s infinite 0.5s',
+                  }}
+                ></div>
+                <div
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    backgroundColor: '#999',
+                    animation: 'pulse 1.5s infinite 1s',
+                  }}
+                ></div>
                 <span>AI 正在思考...</span>
               </div>
             </div>
@@ -374,47 +429,56 @@ const AIChat: React.FC = () => {
       </div>
 
       {/* 输入区域 */}
-      <div style={{
-        padding: "16px",
-        backgroundColor: "#fff",
-        borderTop: "1px solid #e0e0e0"
-      }}>
-        <div style={{
-          display: "flex",
-          gap: "8px",
-          alignItems: "flex-end"
-        }}>
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: '#fff',
+          borderTop: '1px solid #e0e0e0',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'flex-end',
+          }}
+        >
           <textarea
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={e => {
+              const textarea = e.target as HTMLTextAreaElement;
+              setInputValue(textarea.value);
+            }}
             onKeyPress={handleKeyPress}
             placeholder="输入您的问题..."
             disabled={isLoading}
             style={{
               flex: 1,
-              minHeight: "40px",
-              maxHeight: "120px",
-              padding: "12px 16px",
-              border: "1px solid #e0e0e0",
-              borderRadius: "20px",
-              fontSize: "14px",
-              resize: "none",
-              outline: "none",
-              fontFamily: "inherit"
+              minHeight: '40px',
+              maxHeight: '120px',
+              padding: '12px 16px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '20px',
+              fontSize: '14px',
+              resize: 'none',
+              outline: 'none',
+              fontFamily: 'inherit',
             }}
           />
           <button
             onClick={sendMessage}
             disabled={!inputValue.trim() || isLoading}
             style={{
-              padding: "12px 20px",
-              backgroundColor: inputValue.trim() && !isLoading ? "#007AFF" : "#ccc",
-              color: "#fff",
-              border: "none",
-              borderRadius: "20px",
-              cursor: inputValue.trim() && !isLoading ? "pointer" : "not-allowed",
-              fontSize: "14px",
-              fontWeight: "600"
+              padding: '12px 20px',
+              backgroundColor:
+                inputValue.trim() && !isLoading ? '#007AFF' : '#ccc',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '20px',
+              cursor:
+                inputValue.trim() && !isLoading ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              fontWeight: '600',
             }}
           >
             发送
@@ -591,7 +655,7 @@ export default function App() {
 
 // 确保 DOM 加载完成后再渲染
 if (typeof document !== 'undefined') {
-  const rootElement = document.getElementById("root");
+  const rootElement = document.getElementById('root');
   if (rootElement) {
     const root = createRoot(rootElement);
     root.render(<App />);

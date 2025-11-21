@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
-import { createRoot } from "react-dom/client";
-import ReactMarkdown from "react-markdown";
-import { useWebSocket } from "ahooks";
+import React, { useState, useRef, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import ReactMarkdown from 'react-markdown';
+import { useWebSocket } from 'ahooks';
 
 interface Message {
   id: string;
@@ -19,7 +19,7 @@ interface WebSocketMessage {
 
 const AIChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // 使用 ahooks 的 useWebSocket
@@ -28,7 +28,7 @@ const AIChat: React.FC = () => {
     latestMessage,
     sendMessage: sendWsMessage,
     connect,
-    disconnect
+    disconnect,
   } = useWebSocket('ws://localhost:3005/chat', {
     onOpen: () => {
       console.log('✅ WebSocket 连接已建立');
@@ -36,17 +36,17 @@ const AIChat: React.FC = () => {
     onClose: () => {
       console.log('🔴 WebSocket 连接已关闭');
     },
-    onError: (event) => {
+    onError: event => {
       console.error('❌ WebSocket 错误:', event);
     },
     reconnectLimit: 5,
     reconnectInterval: 3000,
-    manual: false
+    manual: false,
   });
 
   // 自动滚动到最新消息
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // 处理最新消息
@@ -71,72 +71,90 @@ const AIChat: React.FC = () => {
       console.log('🔍 提取自定义消息:', customMessage);
 
       switch (customMessage.type) {
-      case 'system_message':
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          content: customMessage.data.message,
-          isUser: false,
-          timestamp: new Date(customMessage.data.timestamp),
-        }]);
-        break;
-
-      case 'ai_processing':
-        // AI开始处理，显示AI回复内容
-        setMessages(prev => [...prev, {
-          id: 'ai-processing-' + Date.now().toString(),
-          content: customMessage.data.response || '🤖 AI正在思考中...',
-          isUser: false,
-          timestamp: new Date(customMessage.data.timestamp),
-          status: 'sending' as const
-        }]);
-        break;
-
-      case 'ai_response_complete':
-        // AI完整回复，更新处理中的消息状态
-        setMessages(prev => {
-          const processingMessageIndex = prev.findIndex(msg => msg.id.startsWith('ai-processing-'));
-          if (processingMessageIndex !== -1) {
-            // 更新处理中的消息为完成状态
-            const updatedMessages = [...prev];
-            updatedMessages[processingMessageIndex] = {
-              ...updatedMessages[processingMessageIndex],
-              content: customMessage.data.response,
-              timestamp: new Date(customMessage.data.timestamp),
-              status: 'sent' as const
-            };
-            return updatedMessages;
-          } else {
-            // 如果没有处理中的消息，则添加新消息
-            return [...prev, {
+        case 'system_message':
+          setMessages(prev => [
+            ...prev,
+            {
               id: Date.now().toString(),
-              content: customMessage.data.response,
+              content: customMessage.data.message,
               isUser: false,
               timestamp: new Date(customMessage.data.timestamp),
-              status: 'sent' as const
-            }];
-          }
-        });
-        break;
+            },
+          ]);
+          break;
 
-      case 'error':
-        // 错误消息，添加为新消息
-        setMessages(prev => [...prev, {
-          id: Date.now().toString(),
-          content: customMessage.data.message || '发生错误',
-          isUser: false,
-          timestamp: new Date(),
-          status: 'error' as const,
-          error: customMessage.data.error
-        }]);
-        break;
+        case 'ai_processing':
+          // AI开始处理，显示AI回复内容
+          setMessages(prev => [
+            ...prev,
+            {
+              id: 'ai-processing-' + Date.now().toString(),
+              content: customMessage.data.response || '🤖 AI正在思考中...',
+              isUser: false,
+              timestamp: new Date(customMessage.data.timestamp),
+              status: 'sending' as const,
+            },
+          ]);
+          break;
 
-      case 'pong':
-        // 心跳响应，无需处理
-        break;
+        case 'ai_response_complete':
+          // AI完整回复，更新处理中的消息状态
+          setMessages(prev => {
+            const processingMessageIndex = prev.findIndex(msg =>
+              msg.id.startsWith('ai-processing-')
+            );
+            if (processingMessageIndex !== -1) {
+              // 更新处理中的消息为完成状态
+              const updatedMessages = [...prev];
+              updatedMessages[processingMessageIndex] = {
+                ...updatedMessages[processingMessageIndex],
+                content: customMessage.data.response,
+                timestamp: new Date(customMessage.data.timestamp),
+                status: 'sent' as const,
+                id:
+                  updatedMessages[processingMessageIndex]?.id ||
+                  `ai-${Date.now()}`,
+                isUser: false,
+              };
+              return updatedMessages;
+            } else {
+              // 如果没有处理中的消息，则添加新消息
+              return [
+                ...prev,
+                {
+                  id: Date.now().toString(),
+                  content: customMessage.data.response,
+                  isUser: false,
+                  timestamp: new Date(customMessage.data.timestamp),
+                  status: 'sent' as const,
+                },
+              ];
+            }
+          });
+          break;
 
-      default:
-        console.warn('未知消息类型:', customMessage.type);
-    }
+        case 'error':
+          // 错误消息，添加为新消息
+          setMessages(prev => [
+            ...prev,
+            {
+              id: Date.now().toString(),
+              content: customMessage.data.message || '发生错误',
+              isUser: false,
+              timestamp: new Date(),
+              status: 'error' as const,
+              error: customMessage.data.error,
+            },
+          ]);
+          break;
+
+        case 'pong':
+          // 心跳响应，无需处理
+          break;
+
+        default:
+          console.warn('未知消息类型:', customMessage.type);
+      }
     } else {
       // 处理其他类型的消息（如connected等）
       console.log('忽略系统消息类型:', message.type);
@@ -152,19 +170,19 @@ const AIChat: React.FC = () => {
       content: inputValue.trim(),
       isUser: true,
       timestamp: new Date(),
-      status: 'sending'
+      status: 'sending',
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setInputValue("");
+    setInputValue('');
 
     // 发送消息到服务器
     const messageToSend = JSON.stringify({
       type: 'chat_message',
       data: {
         message: userMessage.content,
-        messageId: messageId
-      }
+        messageId: messageId,
+      },
     });
     console.log('📤 发送消息到服务器:', messageToSend);
     sendWsMessage(messageToSend);
@@ -178,9 +196,9 @@ const AIChat: React.FC = () => {
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString("zh-CN", {
-      hour: "2-digit",
-      minute: "2-digit"
+    return date.toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
     });
   };
 
@@ -231,116 +249,153 @@ const AIChat: React.FC = () => {
           }
         }, 300);
       }, 2000);
-
     } catch (error) {
-      console.error("复制失败:", error);
+      console.error('复制失败:', error);
     }
   };
 
   const getConnectionStatusText = () => {
     switch (readyState) {
-      case 0: return '🟡 连接中...';
-      case 1: return '🟢 已连接';
-      case 2: return '🟠 关闭中...';
-      case 3: return '🔴 已断开';
-      default: return '⚪ 未知状态';
+      case 0:
+        return '🟡 连接中...';
+      case 1:
+        return '🟢 已连接';
+      case 2:
+        return '🟠 关闭中...';
+      case 3:
+        return '🔴 已断开';
+      default:
+        return '⚪ 未知状态';
     }
   };
 
   const isConnected = readyState === 1;
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100vh",
-      maxWidth: "800px",
-      margin: "0 auto",
-      backgroundColor: "#f5f5f5",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100vh',
+        maxWidth: '800px',
+        margin: '0 auto',
+        backgroundColor: '#f5f5f5',
+        fontFamily:
+          "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      }}
+    >
       {/* 标题栏 */}
-      <div style={{
-        padding: "16px",
-        backgroundColor: "#fff",
-        borderBottom: "1px solid #e0e0e0",
-        textAlign: "center",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
-      }}>
-        <h1 style={{
-          margin: 0,
-          color: "#333",
-          fontSize: "24px",
-          fontWeight: "600"
-        }}>
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: '#fff',
+          borderBottom: '1px solid #e0e0e0',
+          textAlign: 'center',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            color: '#333',
+            fontSize: '24px',
+            fontWeight: '600',
+          }}
+        >
           AI 实时聊天助手
         </h1>
-        <p style={{
-          margin: "4px 0 0 0",
-          color: "#666",
-          fontSize: "14px"
-        }}>
+        <p
+          style={{
+            margin: '4px 0 0 0',
+            color: '#666',
+            fontSize: '14px',
+          }}
+        >
           基于 WebSocket 的实时对话系统
         </p>
-        <div style={{
-          marginTop: "8px",
-          fontSize: "12px",
-          color: readyState === 1 ? "#10b981" :
-                 readyState === 0 ? "#f59e0b" : "#ef4444"
-        }}>
+        <div
+          style={{
+            marginTop: '8px',
+            fontSize: '12px',
+            color:
+              readyState === 1
+                ? '#10b981'
+                : readyState === 0
+                  ? '#f59e0b'
+                  : '#ef4444',
+          }}
+        >
           {getConnectionStatusText()}
         </div>
       </div>
 
       {/* 消息区域 */}
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        padding: "16px",
-        backgroundColor: "#fff"
-      }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '16px',
+          backgroundColor: '#fff',
+        }}
+      >
         {messages.length === 0 ? (
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            height: "100%",
-            color: "#999",
-            textAlign: "center"
-          }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px" }}>🤖</div>
-            <h3 style={{ margin: "0 0 8px 0", color: "#666" }}>欢迎使用实时 AI 聊天助手</h3>
-            <p style={{ margin: 0, fontSize: "14px" }}>开始对话，体验实时 AI 助手的强大能力</p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              color: '#999',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🤖</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#666' }}>
+              欢迎使用实时 AI 聊天助手
+            </h3>
+            <p style={{ margin: 0, fontSize: '14px' }}>
+              开始对话，体验实时 AI 助手的强大能力
+            </p>
             {!isConnected && (
-              <p style={{ margin: "8px 0 0 0", fontSize: "12px", color: "#ef4444" }}>
+              <p
+                style={{
+                  margin: '8px 0 0 0',
+                  fontSize: '12px',
+                  color: '#ef4444',
+                }}
+              >
                 正在连接服务器，请稍候...
               </p>
             )}
           </div>
         ) : (
-          messages.map((message) => (
+          messages.map(message => (
             <div
               key={message.id}
               style={{
-                display: "flex",
-                justifyContent: message.isUser ? "flex-end" : "flex-start",
-                marginBottom: "16px"
+                display: 'flex',
+                justifyContent: message.isUser ? 'flex-end' : 'flex-start',
+                marginBottom: '16px',
               }}
             >
-              <div style={{
-                maxWidth: "70%",
-                padding: "12px 16px",
-                borderRadius: "18px",
-                backgroundColor: message.isUser ? "#007AFF" : "#F0F0F0",
-                color: message.isUser ? "#FFF" : "#333",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-                wordWrap: "break-word",
-                position: "relative",
-                opacity: message.status === 'sending' ? 0.7 : 1
-              }}>
+              <div
+                style={{
+                  maxWidth: '70%',
+                  padding: '12px 16px',
+                  borderRadius: '18px',
+                  backgroundColor: message.isUser ? '#007AFF' : '#F0F0F0',
+                  color: message.isUser ? '#FFF' : '#333',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                  wordWrap: 'break-word',
+                  position: 'relative',
+                  opacity: message.status === 'sending' ? 0.7 : 1,
+                }}
+              >
                 {message.isUser ? (
-                  <div style={{ whiteSpace: "pre-wrap" }}>{message.content}</div>
+                  <div style={{ whiteSpace: 'pre-wrap' }}>
+                    {message.content}
+                  </div>
                 ) : (
                   <div className="markdown-content">
                     <ReactMarkdown>{message.content}</ReactMarkdown>
@@ -349,35 +404,42 @@ const AIChat: React.FC = () => {
 
                 {/* 复制按钮（仅AI回复） */}
                 {!message.isUser && message.status !== 'sending' && (
-                  <div style={{
-                    position: "absolute",
-                    bottom: "8px",
-                    left: "8px",
-                    display: "flex",
-                    gap: "4px",
-                    opacity: 0,
-                    transition: "opacity 0.2s ease"
-                  }} className="copy-buttons">
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: '8px',
+                      left: '8px',
+                      display: 'flex',
+                      gap: '4px',
+                      opacity: 0,
+                      transition: 'opacity 0.2s ease',
+                    }}
+                    className="copy-buttons"
+                  >
                     <button
-                      onClick={() => copyToClipboard(message.content, 'markdown')}
+                      onClick={() =>
+                        copyToClipboard(message.content, 'markdown')
+                      }
                       style={{
-                        background: "rgba(255, 255, 255, 0.9)",
-                        border: "none",
-                        borderRadius: "12px",
-                        padding: "4px 8px",
-                        fontSize: "10px",
-                        color: "#333",
-                        cursor: "pointer",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                        transition: "all 0.2s ease"
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '4px 8px',
+                        fontSize: '10px',
+                        color: '#333',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                        transition: 'all 0.2s ease',
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "rgba(255, 255, 255, 1)";
-                        e.currentTarget.style.transform = "scale(1.05)";
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background =
+                          'rgba(255, 255, 255, 1)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
-                        e.currentTarget.style.transform = "scale(1)";
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background =
+                          'rgba(255, 255, 255, 0.9)';
+                        e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
                       📋 MD
@@ -385,23 +447,25 @@ const AIChat: React.FC = () => {
                     <button
                       onClick={() => copyToClipboard(message.content, 'text')}
                       style={{
-                        background: "rgba(255, 255, 255, 0.9)",
-                        border: "none",
-                        borderRadius: "12px",
-                        padding: "4px 8px",
-                        fontSize: "10px",
-                        color: "#333",
-                        cursor: "pointer",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-                        transition: "all 0.2s ease"
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        border: 'none',
+                        borderRadius: '12px',
+                        padding: '4px 8px',
+                        fontSize: '10px',
+                        color: '#333',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                        transition: 'all 0.2s ease',
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "rgba(255, 255, 255, 1)";
-                        e.currentTarget.style.transform = "scale(1.05)";
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background =
+                          'rgba(255, 255, 255, 1)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "rgba(255, 255, 255, 0.9)";
-                        e.currentTarget.style.transform = "scale(1)";
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background =
+                          'rgba(255, 255, 255, 0.9)';
+                        e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
                       📝 文本
@@ -410,25 +474,33 @@ const AIChat: React.FC = () => {
                 )}
 
                 {/* 消息状态 */}
-                <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: message.isUser ? "flex-end" : "space-between",
-                  marginTop: "4px",
-                  gap: "8px"
-                }}>
-                  <div style={{
-                    fontSize: "12px",
-                    opacity: 0.7
-                  }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: message.isUser
+                      ? 'flex-end'
+                      : 'space-between',
+                    marginTop: '4px',
+                    gap: '8px',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      opacity: 0.7,
+                    }}
+                  >
                     {formatTime(message.timestamp)}
                   </div>
 
                   {message.isUser && (
-                    <div style={{
-                      fontSize: "10px",
-                      opacity: 0.7
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '10px',
+                        opacity: 0.7,
+                      }}
+                    >
                       {message.status === 'sending' && '🟡 发送中'}
                       {message.status === 'sent' && '✅ 已发送'}
                       {message.status === 'error' && '❌ 发送失败'}
@@ -438,15 +510,17 @@ const AIChat: React.FC = () => {
 
                 {/* 错误消息 */}
                 {message.error && (
-                  <div style={{
-                    marginTop: "8px",
-                    padding: "8px",
-                    backgroundColor: "#fee2e2",
-                    border: "1px solid #fecaca",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    color: "#dc2626"
-                  }}>
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '8px',
+                      backgroundColor: '#fee2e2',
+                      border: '1px solid #fecaca',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: '#dc2626',
+                    }}
+                  >
                     {message.error}
                   </div>
                 )}
@@ -458,48 +532,54 @@ const AIChat: React.FC = () => {
       </div>
 
       {/* 输入区域 */}
-      <div style={{
-        padding: "16px",
-        backgroundColor: "#fff",
-        borderTop: "1px solid #e0e0e0"
-      }}>
-        <div style={{
-          display: "flex",
-          gap: "8px",
-          alignItems: "flex-end"
-        }}>
+      <div
+        style={{
+          padding: '16px',
+          backgroundColor: '#fff',
+          borderTop: '1px solid #e0e0e0',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            alignItems: 'flex-end',
+          }}
+        >
           <textarea
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={e => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={isConnected ? "输入您的问题..." : "连接中，请稍候..."}
+            placeholder={isConnected ? '输入您的问题...' : '连接中，请稍候...'}
             disabled={!isConnected}
             style={{
               flex: 1,
-              minHeight: "40px",
-              maxHeight: "120px",
-              padding: "12px 16px",
-              border: "1px solid #e0e0e0",
-              borderRadius: "20px",
-              fontSize: "14px",
-              resize: "none",
-              outline: "none",
-              fontFamily: "inherit",
-              opacity: isConnected ? 1 : 0.6
+              minHeight: '40px',
+              maxHeight: '120px',
+              padding: '12px 16px',
+              border: '1px solid #e0e0e0',
+              borderRadius: '20px',
+              fontSize: '14px',
+              resize: 'none',
+              outline: 'none',
+              fontFamily: 'inherit',
+              opacity: isConnected ? 1 : 0.6,
             }}
           />
           <button
             onClick={sendMessage}
             disabled={!inputValue.trim() || !isConnected}
             style={{
-              padding: "12px 20px",
-              backgroundColor: inputValue.trim() && isConnected ? "#007AFF" : "#ccc",
-              color: "#fff",
-              border: "none",
-              borderRadius: "20px",
-              cursor: inputValue.trim() && isConnected ? "pointer" : "not-allowed",
-              fontSize: "14px",
-              fontWeight: "600"
+              padding: '12px 20px',
+              backgroundColor:
+                inputValue.trim() && isConnected ? '#007AFF' : '#ccc',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '20px',
+              cursor:
+                inputValue.trim() && isConnected ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              fontWeight: '600',
             }}
           >
             发送
@@ -676,7 +756,7 @@ export default function App() {
 
 // 确保 DOM 加载完成后再渲染
 if (typeof document !== 'undefined') {
-  const rootElement = document.getElementById("root");
+  const rootElement = document.getElementById('root');
   if (rootElement) {
     const root = createRoot(rootElement);
     root.render(<App />);

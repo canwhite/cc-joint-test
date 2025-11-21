@@ -31,11 +31,11 @@
 
 本项目集成了测试了以下自建库：
 
-| 项目               | 描述                                       | 链接                                                 |
-| ------------------ | ------------------------------------------ | ---------------------------------------------------- |
-| **cc-session**     | Claude Agent SDK，易于使用的会话和请求管理 | [GitHub](https://github.com/canwhite/cc-session)     |
-| **cc-json-parser** | 从 AI 结果中快速提取 JSON 数据             | [GitHub](https://github.com/canwhite/cc-json-parser) |
-| **cc-communication** | WebSocket 通信工具，支持实时数据传输 | [GitHub](https://github.com/canwhite/cc-communication) |
+| 项目                 | 描述                                       | 链接                                                   |
+| -------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| **cc-session**       | Claude Agent SDK，易于使用的会话和请求管理 | [GitHub](https://github.com/canwhite/cc-session)       |
+| **cc-json-parser**   | 从 AI 结果中快速提取 JSON 数据             | [GitHub](https://github.com/canwhite/cc-json-parser)   |
+| **cc-communication** | WebSocket 通信工具，支持实时数据传输       | [GitHub](https://github.com/canwhite/cc-communication) |
 
 ## 💻 使用示例
 
@@ -46,16 +46,16 @@ import {
   Session,
   SessionManager,
   createClientWithPreset,
-} from "@iamqc/cc-session";
-import { JSONParser } from "@iamqc/cc-json-parser";
+} from '@iamqc/cc-session';
+import { JSONParser } from '@iamqc/cc-json-parser';
 
 /**
  * 集成使用示例：创建会话、发送消息并解析 JSON 响应
  */
 async function finalTest() {
   // 使用开发预设创建客户端，并指定 Claude Code 可执行文件路径
-  const client = createClientWithPreset("development", {
-    pathToClaudeCodeExecutable: "/Users/zack/.bun/bin/claude",
+  const client = createClientWithPreset('development', {
+    pathToClaudeCodeExecutable: '/Users/zack/.bun/bin/claude',
   });
 
   // 创建会话实例
@@ -66,13 +66,13 @@ async function finalTest() {
   session.subscribe((session, message) => {
     console.log(
       `[订阅] ${message.type}:`,
-      message.type === "message_added"
-        ? "收到新消息"
-        : message.type === "session_info"
-        ? `会话状态: ${message.isActive ? "活跃" : "空闲"}`
-        : message.type === "usage_updated"
-        ? `使用统计: ${JSON.stringify(message.usage)}`
-        : message
+      message.type === 'message_added'
+        ? '收到新消息'
+        : message.type === 'session_info'
+          ? `会话状态: ${message.isActive ? '活跃' : '空闲'}`
+          : message.type === 'usage_updated'
+            ? `使用统计: ${JSON.stringify(message.usage)}`
+            : message
     );
   });
 
@@ -86,13 +86,13 @@ async function finalTest() {
     }
   `);
 
-  console.log("--Response:", result.lastAssistantMessage.content);
+  console.log('--Response:', result.lastAssistantMessage.content);
   const responseText = result.lastAssistantMessage.content[0].content.text;
-  console.log("--Response text:", responseText);
+  console.log('--Response text:', responseText);
 
   // 使用 JSONParser 从 Markdown 代码块中提取 JSON 数据
   const extractedData = await JSONParser.extractJSON(responseText);
-  console.log("--Extracted JSON:", extractedData);
+  console.log('--Extracted JSON:', extractedData);
 }
 
 // 执行测试函数
@@ -112,28 +112,29 @@ import { JSONParser } from '@iamqc/cc-json-parser';
 const ws = new CCWebSocket({
   port: 3001,
   handlers: {
-    onClientConnect: (clientId) => {
+    onClientConnect: clientId => {
       console.log(`客户端 ${clientId} 已连接`);
     },
     onCustomMessage: async (type, data, clientId) => {
       if (type === 'chat') {
         // 处理聊天消息
-        const client = createClientWithPreset("development", {
-          pathToClaudeCodeExecutable: "/Users/zack/.bun/bin/claude",
+        const client = createClientWithPreset('development', {
+          pathToClaudeCodeExecutable: '/Users/zack/.bun/bin/claude',
         });
 
         const session = new Session(client);
         const result = await session.send(data.message);
-        const responseText = result.lastAssistantMessage.content[0].content.text;
+        const responseText =
+          result.lastAssistantMessage.content[0].content.text;
 
         // 发送 AI 回复给客户端
         ws.sendToClient(clientId, {
           type: 'chat_response',
-          data: { response: responseText }
+          data: { response: responseText },
         });
       }
-    }
-  }
+    },
+  },
 });
 
 await ws.start();
@@ -145,6 +146,7 @@ console.log('WebSocket 服务器已启动');
 我们提供了两个完整的聊天应用示例，展示了不同的架构方案：
 
 #### 1. HTTP 版本 (chat-example)
+
 - **项目位置**: [`chat-example/`](./chat-example/)
 - **通信方式**: HTTP REST API
 - **特点**: 简单直接，适合基础应用
@@ -157,13 +159,16 @@ console.log('WebSocket 服务器已启动');
 **查看详细文档**: [chat-example README](./chat-example/README.md)
 
 **快速体验**:
+
 ```bash
 bun run chat:build
 bun run chat:start
 ```
+
 然后访问 http://localhost:3001
 
 #### 2. WebSocket 版本 (chat-example-comm)
+
 - **项目位置**: [`chat-example-comm/`](./chat-example-comm/)
 - **通信方式**: WebSocket 实时通信
 - **特点**: 实时性强，适合需要实时更新的应用
@@ -177,10 +182,12 @@ bun run chat:start
 **查看详细文档**: [chat-example-comm README](./chat-example-comm/README.md)
 
 **快速体验**:
+
 ```bash
 bun run chat:comm:build
 bun run chat:comm:start
 ```
+
 然后访问 http://localhost:3002
 
 ## 📦 安装说明
