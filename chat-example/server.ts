@@ -68,7 +68,17 @@ Bun.serve({
           });
         }
 
-        const response = await aiChatService.sendMessage(message);
+        const prompt = `
+          我在一些领域是个小白，所以一定要给我说清楚，最好能举例
+          - 如果我让你完成一项任务，你最好分析一下任务里有哪些丢失的信息， 然后直接问我，以便我们在信息和目标上是同步的
+          - 如果我问一个英语单词，请告诉我发音和词根，以及举12个不同上下文的例子
+          - 如果我让你分析某个项目，你先读取项目主体结构和信息，然后在回答我项目问题
+          - 其他问题就正常回答就ok
+          以下是我问的问题:
+      ${message}
+        `;
+
+        const response = await aiChatService.sendMessage(prompt);
 
         return new Response(
           JSON.stringify({

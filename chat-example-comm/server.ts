@@ -24,23 +24,6 @@ class ChatSessionManager {
           JSON.stringify(message, null, 2)
         );
 
-        console.log('--type--', message.type);
-        console.log('--message complete data', JSON.stringify(message));
-
-        // 调试：记录所有消息类型和内容
-        console.log(
-          `🔍 调试消息 - 类型: ${message.type}, 消息详情:`,
-          JSON.stringify(
-            {
-              type: message.type,
-              messageType: (message as any).message?.type,
-              subtype: (message as any).subtype,
-              result: (message as any).result,
-            },
-            null,
-            2
-          )
-        );
         // 1. AI开始处理时发送状态
         if (
           message.type === 'message_added' &&
